@@ -1,45 +1,67 @@
-import Head from "next/head";
-import Signup from "../components/Signup";
+import { useState } from "react";
+import Filter from "../components/Filter/Filter";
+import Limit from "../components/Limit/Limit";
+import Sort from "../components/Sort/Sort";
 import styles from "../styles/Index.module.scss";
 
 export const Home = (): JSX.Element => {
+    const [outputString, setOutputString] = useState("");
+
+    const addFilterHandler = (item: string, filter: string, value: string) => {
+        setOutputString((oldOutputString: string) =>
+            oldOutputString.concat(
+                `${
+                    oldOutputString.length > 0 ? "&" : "?"
+                }${item}_${filter}=${value}`,
+            ),
+        );
+    };
+
+    const addSortingHandler = (value: string, sortBy: string) => {
+        setOutputString((oldOutputString: string) =>
+            oldOutputString.concat(
+                `${
+                    oldOutputString.length > 0 ? "&" : "?"
+                }_sort=${value}:${sortBy}`,
+            ),
+        );
+    };
+
+    const addLimitHandler = ({ start, limit }) => {
+        const limitArray = [];
+
+        if (start.trim() !== "") {
+            limitArray.push(`_start=${start}`);
+        }
+
+        if (limit.trim() !== "") {
+            limitArray.push(`_limit=${limit}`);
+        }
+
+        setOutputString((oldOutputString: string) => {
+            const prefix = outputString.length > 0 ? "&" : "?";
+            const limitString =
+                limitArray.length === 2 ? limitArray.join("&") : limitArray[0];
+
+            return oldOutputString + prefix + limitString;
+        });
+    };
+
     return (
-        <div className={styles.container}>
-            <Head>
-                <title>Create Next App</title>
-                <link rel="icon" href="/favicon.ico" />
-            </Head>
-
-            <main>
-                <h1 className={styles.title}>
-                    Welcome to{" "}
-                    <a href="https://nextjs.org">Next.js with Magic!</a>
-                </h1>
-                <p className={styles.description}>
-                    Edit the login tool by editing{" "}
-                    <code>components/Signup</code>
-                </p>
-                <Signup />
-                <p className={styles.description}>
-                    Get started by editing <code>pages/index.tsx</code>
-                </p>
-            </main>
-
-            <footer>
-                <a
-                    href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Powered by{" "}
-                    <img
-                        src="/vercel.svg"
-                        alt="Vercel Logo"
-                        className={styles.logo}
-                    />
-                </a>
-            </footer>
-        </div>
+        <main className={styles.container}>
+            <div>
+                <h1>Strapi Query Tool</h1>
+            </div>
+            <div>
+                <Filter addFilter={addFilterHandler} />
+                <Sort addSorting={addSortingHandler} />
+                <Limit addLimit={addLimitHandler} />
+            </div>
+            <div>
+                <p>Output:</p>
+                <p>{outputString}</p>
+            </div>
+        </main>
     );
 };
 
