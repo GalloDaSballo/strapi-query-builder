@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Filter from "../components/Filter";
 import Limit from "../components/LimitAndMax";
 import Sort from "../components/Sort";
+import WhereClauseFilter from "../components/WhereClauseFilter";
 import styles from "../styles/Index.module.scss";
 
 export const Home = (): JSX.Element => {
@@ -72,6 +73,13 @@ export const Home = (): JSX.Element => {
                 <Limit
                     addLimit={(value: string) => setValue(value, 2)}
                     removeLimit={() => nullifyValue(2)}
+                />
+                <p>Advance filtering</p>
+                <WhereClauseFilter
+                    addWhereClauseFilter={useCallback(
+                        (value: string) => setValue(value, 0),
+                        [],
+                    )}
                 />
             </div>
             <div style={{ padding: "50px 0" }}>
