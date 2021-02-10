@@ -1,65 +1,82 @@
 import { useState } from "react";
-import Filter from "../components/Filter/Filter";
-import Limit from "../components/Limit/Limit";
-import Sort from "../components/Sort/Sort";
+import Filter from "../components/Filter";
+import Limit from "../components/LimitAndMax";
+import Sort from "../components/Sort";
 import styles from "../styles/Index.module.scss";
 
 export const Home = (): JSX.Element => {
-    const [outputString, setOutputString] = useState("");
+    const [outputStringArray, setOutputStringArray] = useState([
+        null,
+        null,
+        null,
+    ]);
 
-    const addFilterHandler = (item: string, filter: string, value: string) => {
-        setOutputString((oldOutputString: string) =>
-            oldOutputString.concat(
-                `${
-                    oldOutputString.length > 0 ? "&" : "?"
-                }${item}_${filter}=${value}`,
-            ),
-        );
-    };
+    const [resourceUrl, setResourceUrl] = useState("");
 
-    const addSortingHandler = (value: string, sortBy: string) => {
-        setOutputString((oldOutputString: string) =>
-            oldOutputString.concat(
-                `${
-                    oldOutputString.length > 0 ? "&" : "?"
-                }_sort=${value}:${sortBy}`,
-            ),
-        );
-    };
-
-    const addLimitHandler = ({ start, limit }) => {
-        const limitArray = [];
-
-        if (start.trim() !== "") {
-            limitArray.push(`_start=${start}`);
-        }
-
-        if (limit.trim() !== "") {
-            limitArray.push(`_limit=${limit}`);
-        }
-
-        setOutputString((oldOutputString: string) => {
-            const prefix = outputString.length > 0 ? "&" : "?";
-            const limitString =
-                limitArray.length === 2 ? limitArray.join("&") : limitArray[0];
-
-            return oldOutputString + prefix + limitString;
+    const nullifyValue = (index: number) => {
+        setOutputStringArray((oldStringArray) => {
+            const newStringArray = [...oldStringArray];
+            newStringArray[index] = null;
+            return newStringArray;
         });
     };
 
+    const setValue = (value: string, index: number) => {
+        setOutputStringArray((oldStringArray) => {
+            const newStringArray = [...oldStringArray];
+            newStringArray[index] = value;
+            return newStringArray;
+        });
+    };
+
+    const joinOutputString = () => {
+        let output = `${resourceUrl}?`;
+
+        outputStringArray.forEach((outputString, index) => {
+            if (outputString) {
+                if (index === 0) {
+                    output += `${outputString}`;
+                } else {
+                    output += `&${outputString}`;
+                }
+            }
+        });
+
+        return output;
+    };
+
     return (
-        <main className={styles.container}>
+        <main
+            className={styles.container}
+            style={{ width: "720px", margin: "0 auto" }}
+        >
             <div>
                 <h1>Strapi Query Tool</h1>
             </div>
+            <input
+                type="text"
+                onChange={(e) => setResourceUrl(e.target.value)}
+                value={resourceUrl}
+                placeholder="Resource URL (https://localhost:3000/blogs)"
+                style={{ width: "83%", margin: "10px 0" }}
+            />
             <div>
-                <Filter addFilter={addFilterHandler} />
-                <Sort addSorting={addSortingHandler} />
-                <Limit addLimit={addLimitHandler} />
+                <Filter
+                    addFilter={(value: string) => setValue(value, 0)}
+                    removeFilter={() => nullifyValue(0)}
+                />
+                <Sort
+                    addSorting={(value: string) => setValue(value, 1)}
+                    removeSorting={() => nullifyValue(1)}
+                />
+                <Limit
+                    addLimit={(value: string) => setValue(value, 2)}
+                    removeLimit={() => nullifyValue(2)}
+                />
             </div>
-            <div>
+            <div style={{ padding: "50px 0" }}>
                 <p>Output:</p>
-                <p>{outputString}</p>
+                <p>{joinOutputString()}</p>
             </div>
         </main>
     );

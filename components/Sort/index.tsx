@@ -1,20 +1,30 @@
 import React, { useState } from "react";
 
 interface SortProps {
-    addSorting: (value: string, sortBy: string) => void;
+    addSorting: (value: string) => void;
+    removeSorting: () => void;
 }
 
-const Sort = ({ addSorting }: SortProps) => {
+const Sort = ({ addSorting, removeSorting }: SortProps) => {
     const [sortSelect, setSortSelect] = useState("default");
     const [valueInput, setValueInput] = useState("");
+    const [isActive, setIsActive] = useState(false);
 
     const addSortingHandler = () => {
-        addSorting(valueInput, sortSelect);
+        if (sortSelect !== "default") {
+            addSorting(`_sort=${valueInput}:${sortSelect}`);
+            setIsActive(true);
+        }
+    };
+
+    const removeSortingHandler = () => {
+        removeSorting();
+        setIsActive(false);
     };
 
     return (
         <div>
-            <span>Sort by: </span>
+            <span>Sort: </span>
             <input
                 type="text"
                 placeholder="value"
@@ -29,7 +39,11 @@ const Sort = ({ addSorting }: SortProps) => {
                 <option value="ASC">ASC</option>
                 <option value="DESC">DESC</option>
             </select>
-            <button onClick={addSortingHandler}>add sorting</button>
+            <button
+                onClick={isActive ? removeSortingHandler : addSortingHandler}
+            >
+                {isActive ? "Remove" : "Add"} Sorting
+            </button>
         </div>
     );
 };
